@@ -1,0 +1,26 @@
+{
+    "name": "RMI-NG",
+    "version": "1.0.0",
+    "description": "A JavaScript RMI library based on AngularJS RMI",
+    "authors": [
+        "Dimagi <dev@dimagi.com>"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/dimagi/rmi-ng",
+    "keywords": [
+        "RMI"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dimagi/rmi-ng.git"
+    },
+    "devDependencies": {
+        "chai": "~3.4.1",
+        "jshint": "~2.8.0",
+        "mocha": ">=1.9.0"
+    },
+    "main": "rmi-ng.js",
+    "scripts": {
+        "test": "mocha && jshint rmi-ng.js test/*.js"
+    }
+}
