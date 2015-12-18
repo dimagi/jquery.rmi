@@ -18,16 +18,13 @@
  *
  *  var rmi = RMI({% djng_current_rmi %}, "optional-csrf-token");
  *  rmi.remote_method_name({arbitrary: "object"})
- *      .done(function (data) {
- *          // handle success
- *          // data: deserialized JSON object returned by the remote method
- *      })
- *      .fail(function (jqXHR, textStatus, errorThrown) {
- *          // handle error
- *      });
+ *      .done(function (result) { ... })
+ *      .fail(function (jqXHR, textStatus, errorThrown) { ... });
  *
  *  var rmi = RMI({% djng_all_rmi %}, "optional-csrf-token");
  *  rmi.viewname.remote_method_name({arbitrary: "object"})
+ *      .done(function (result) { ... })
+ *      .fail(function (jqXHR, textStatus, errorThrown) { ... });
  */
 function RMI(baseUrl, csrfToken, ajax) {
 
