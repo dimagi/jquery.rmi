@@ -1,4 +1,4 @@
-describe("RMI-NG", function () {
+describe("jquery.rmi", function () {
     var assert = chai.assert,
         csrftoken = jQuery.cookie('csrftoken');
 

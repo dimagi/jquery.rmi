@@ -1,6 +1,6 @@
-describe("RMI-NG", function () {
+describe("jquery.rmi", function () {
     var assert = require("chai").assert,
-        RMI = require("../rmi-ng.js"),
+        RMI = require("../jquery.rmi.js"),
         rmi = RMI("/", null, fakeAjax);
 
     it("should perform a remote method invocation", function (done) {

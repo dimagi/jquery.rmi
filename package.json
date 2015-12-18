@@ -1,26 +1,26 @@
 {
-    "name": "rmi-ng",
+    "name": "jquery.rmi",
     "version": "1.0.0",
     "description": "A JavaScript RMI library based on django-angular RMI that does not require Angular.js",
     "authors": [
         "Dimagi <dev@dimagi.com>"
     ],
     "license": "MIT",
-    "homepage": "https://github.com/dimagi/rmi-ng",
+    "homepage": "https://github.com/dimagi/jquery.rmi",
     "keywords": [
         "RMI"
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/dimagi/rmi-ng.git"
+        "url": "https://github.com/dimagi/jquery.rmi.git"
     },
     "devDependencies": {
         "chai": "~3.4.1",
         "jshint": "~2.8.0",
         "mocha": ">=2.2.5"
     },
-    "main": "rmi-ng.js",
+    "main": "jquery.rmi.js",
     "scripts": {
-        "test": "mocha && jshint rmi-ng.js test/*.js"
+        "test": "mocha && jshint jquery.rmi.js test/*.js"
     }
 }
