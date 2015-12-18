@@ -4,100 +4,92 @@
  * Usage:
  *
  *  var rmi = RMI("/some/url", "optional-csrf-token");
- *  rmi("remote_method_name", {arbitrary: "json data"})
+ *  rmi("remote_method_name", {arbitrary: "object"})
  *      .done(function (data) {
  *          // handle success
- *          // data is deserialized JSON object returned by remote method
+ *          // data: deserialized JSON object returned by the remote method
  *      })
- *      .fail(function (data) {
+ *      .fail(function (jqXHR, textStatus, errorThrown) {
  *          // handle error
- *          // data: {
- *          //     jqXHR: jqXHR,
- *          //     textStatus: textStatus,
- *          //     errorThrown: errorThrown,
- *          // }
- *          // This callback will be invoked on remote error
- *          // or if the returned data was not valid JSON.
  *      });
+ *
+ *
+ * Alternate usage with django-angular template tags:
+ *
+ *  var rmi = RMI({% djng_current_rmi %}, "optional-csrf-token");
+ *  rmi.remote_method_name({arbitrary: "object"})
+ *      .done(function (data) {
+ *          // handle success
+ *          // data: deserialized JSON object returned by the remote method
+ *      })
+ *      .fail(function (jqXHR, textStatus, errorThrown) {
+ *          // handle error
+ *      });
+ *
+ *  var rmi = RMI({% djng_all_rmi %}, "optional-csrf-token");
+ *  rmi.viewname.remote_method_name({arbitrary: "object"})
  */
 function RMI(baseUrl, csrfToken, ajax) {
-    if (ajax === undefined) {
-        ajax = require("jquery").ajax;
+
+    function rmi(func, data, options) {
+        var config = {
+            processData: false,
+            contentType: 'application/json',
+        };
+        if (options) {
+            if (options && options.method === "POST" && data === undefined) {
+                throw new Error(
+                    "Calling remote method " + func + " without data object");
+            }
+            each(options, function (val, name) { config[name] = val; });
+        }
+        if (config.method === "auto" || config.method === undefined) {
+            config.method = data === undefined ? "GET" : "POST";
+        }
+        config.data = JSON.stringify(data);
+        config.url = join(baseUrl, func);
+        config.beforeSend = function (xhr) {
+            if (csrfToken && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            }
+        };
+        return ajax(config);
     }
 
-    function rmi(method, data) {
-        var url = join(baseUrl, method);
-            options = {
-                method: "POST",
-                data: JSON.stringify(data),
-                beforeSend: function (xhr) {
-                    if (csrfToken && !this.crossDomain) {
-                        xhr.setRequestHeader("X-CSRFToken", csrfToken);
-                    }
-                }
-            };
-        return promise(ajax(url, options));
-    }
-
-    function promise(request) {
-        var success = [],
-            error = [],
-            pending = {},
-            result = pending;
-        request.done(function (data, textStatus, jqXHR) {
-            try {
-                result = {success: true, obj: JSON.parse(data)};
-            } catch (errorThrown) {
-                result = {error: true, obj: {
-                    jqXHR: jqXHR,
-                    textStatus: textStatus,
-                    errorThrown: errorThrown,
-                    data: data,
-                }};
+    function makeMethod(name, method, byUrl) {
+        var rmi;
+        if (byUrl.hasOwnProperty(method.url)) {
+            rmi = byUrl[method.url];
+        } else {
+            rmi = byUrl[method.url] = RMI(method.url, csrfToken, ajax);
+        }
+        return function (data) {
+            if (method.method === "POST" && data === undefined) {
+                throw new Error(
+                    "Calling remote method " + name + " without data object");
             }
-            callEach(result.success ? success : error, result.obj);
-        });
-        request.fail(function (jqXHR, textStatus, errorThrown) {
-            result = {error: true, obj: {
-                jqXHR: jqXHR,
-                textStatus: textStatus,
-                errorThrown: errorThrown,
-            }};
-            callEach(error, result.obj);
-        });
-        return {
-            request: request,
-            /**
-             * Register success callback
-             *
-             * Callback will be called immediately if the result is available.
-             */
-            done: function (callback) {
-                if (result === pending) {
-                    success.push(callback);
-                } else if (result.success) {
-                    callback(result.obj);
-                }
-            },
-            /**
-             * Register error callback
-             *
-             * Callback will be called immediately if the remote method
-             * has responded with an error.
-             */
-            fail: function (callback) {
-                if (result === pending) {
-                    error.push(callback);
-                } else if (result.error) {
-                    callback(result.obj);
-                }
-            }
+            return rmi("", data, method);
         };
     }
 
-    function callEach(callbacks, arg) {
-        for (var i = 0; i < callbacks.length; i++) {
-            callbacks[i](arg);
+    function configureMethods(rmi, obj, byUrl) {
+        each(obj, function (val, name) {
+            if (val.hasOwnProperty("url")) {
+                rmi[name] = makeMethod(name, val, byUrl);
+            } else {
+                // recursive config
+                rmi[name] = {};
+                configureMethods(rmi[name], val, byUrl);
+            }
+        });
+    }
+
+    function each(obj, func) {
+        var name;
+        for (name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                func(obj[name], name);
+            }
         }
     }
 
@@ -111,7 +103,20 @@ function RMI(baseUrl, csrfToken, ajax) {
         return [base, "/", rel, (rel ? "/" : "")].join("");
     }
 
+    if (ajax === undefined) {
+        if (typeof jQuery !== "undefined") {
+            ajax = jQuery.ajax;
+        } else {
+            ajax = require("jquery").ajax;
+        }
+    }
+    if (typeof baseUrl !== "string") {
+        configureMethods(rmi, baseUrl, {});
+        //baseUrl = window.location;
+    }
     return rmi;
 }
 
-module.exports = RMI;
+if (typeof module !== "undefined") {
+    module.exports = RMI;
+}

@@ -1,7 +1,7 @@
 {
-    "name": "RMI-NG",
+    "name": "rmi-ng",
     "version": "1.0.0",
-    "description": "A JavaScript RMI library based on AngularJS RMI",
+    "description": "A JavaScript RMI library based on django-angular RMI that does not require Angular.js",
     "authors": [
         "Dimagi <dev@dimagi.com>"
     ],

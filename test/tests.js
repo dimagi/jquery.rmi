@@ -12,56 +12,29 @@ describe("RMI-NG", function () {
     });
 
     it("should fail on remote error", function (done) {
-        var promise = rmi("err", {key: "val"});
-        promise.fail(function (result) {
-            assert.deepEqual(result, {
-                jqXHR: promise.request,
-                textStatus: "404",
-                errorThrown: "not found",
-            });
+        var request = rmi("err", {key: "val"});
+        request.fail(function (req, stat, err) {
+            assert.deepEqual([req, stat, err], [request, "404", "not found"]);
             done();
         });
     });
 
-    it("fail on return bad JSON", function (done) {
-        var promise = rmi("bad-json", {key: "val"});
-        promise.fail(function (result) {
-            assert.equal(result.jqXHR, promise.request);
-            assert.equal(result.textStatus, "200");
-            assert.isDefined(result.errorThrown);
-            assert.equal(result.data, '{"bad-json"}');
-            done();
-        });
-    });
-
-    it("should call done callback after request completes", function () {
-        var data = {key: "val"},
-            result;
-        rmi("sync/ok", data).done(function (r) { result = r; });
-        assert.deepEqual(result, data);
-    });
-
-    it("should call failed callback after request completes", function () {
-        var promise = rmi("sync/err", {key: "val"}),
-            result;
-        promise.fail(function (r) { result = r; });
-        assert.deepEqual(result, {
-            jqXHR: promise.request,
-            textStatus: "404",
-            errorThrown: "not found",
-        });
+    it("should not post without data", function () {
+        assert.throws(function () {
+            rmi("postIt", undefined, {method: "POST"});
+        }, /Calling remote method postIt without data object/);
     });
 
     it("should set CSRF token header", function () {
         var rmi = RMI("/", "csrf-token", fakeAjax);
-            promise = rmi("ok", {});
-        assert.deepEqual(promise.request.headers, {"X-CSRFToken": "csrf-token"});
+            request = rmi("ok", {});
+        assert.deepEqual(request.headers, {"X-CSRFToken": "csrf-token"});
     });
 
     it("should not set CSRF token header on cross domain request", function () {
         var rmi = RMI("/", "csrf-token", fakeAjax);
-            promise = rmi("ok", {crossDomain: true});
-        assert.deepEqual(promise.request.headers, {});
+            request = rmi("ok", {crossDomain: true});
+        assert.deepEqual(request.headers, {});
     });
 
     describe("path concatenator", function () {
@@ -82,21 +55,14 @@ describe("RMI-NG", function () {
     });
 });
 
-function fakeAjax(url, options) {
-    var dones = {
+function fakeAjax(options) {
+    var url = options.url,
+        dones = {
             "/ok/": function (callback) {
                 setTimeout(function () {
-                    callback(options.data, "200", request);
+                    callback(JSON.parse(options.data), "200", request);
                 }, 0);
             },
-            "/sync/ok/": function (callback) {
-                callback(options.data, "200", request);
-            },
-            "/bad-json/": function (callback) {
-                setTimeout(function () {
-                    callback('{"bad-json"}', "200", request);
-                }, 0);
-            }
         },
         fails = {
             "/err/": function (callback) {
@@ -104,23 +70,23 @@ function fakeAjax(url, options) {
                     callback(request, "404", "not found");
                 }, 0);
             },
-            "/sync/err/": function (callback) {
-                callback(request, "404", "not found");
-            },
         },
         request = {
+            headers: {},
             done: function (callback) {
                 if (dones.hasOwnProperty(url)) {
                     dones[url](callback);
                 }
+                return request;
             },
             fail: function (callback) {
                 if (fails.hasOwnProperty(url)) {
                     fails[url](callback);
                 }
-            },
-            headers: {},
+                return request;
+            }
         };
+
     if (options.beforeSend) {
         var xhr = {
                 crossDomain: JSON.parse(options.data).crossDomain,
@@ -129,9 +95,6 @@ function fakeAjax(url, options) {
                 }
             };
         options.beforeSend.call(xhr, xhr);
-    }
-    if (options.method !== "POST") {
-        throw new Error("bad method: " + options.method);
     }
     if (!dones.hasOwnProperty(url) && !fails.hasOwnProperty(url)) {
         throw new Error("unknown url: " + url);

@@ -1,0 +1,29 @@
+{% load djangular_tags %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>rmi-ng/django-angular tests</title>
+  <link href="/static/node_modules/mocha/mocha.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="mocha"></div>{% csrf_token %}
+  <script>
+    var allTags = {% djng_all_rmi %},
+        currentTags = {% djng_current_rmi %};
+  </script>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script src="/static/node_modules/chai/chai.js"></script>
+  <script src="/static/node_modules/mocha/mocha.js"></script>
+  <script src="/static/rmi-ng.js"></script>
+  <script>mocha.setup('bdd')</script>
+  <script src="/static/tests.js"></script>
+  <script>
+    mocha.checkLeaks();
+    mocha.globals(['jQuery', 'tags']);
+    mocha.run();
+  </script>
+</body>
+</html>

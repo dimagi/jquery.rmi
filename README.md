@@ -17,3 +17,11 @@ Run of the following:
     mocha --watch
 
     npm test # also runs jshint
+
+Djangular tests must be run in a browser after starting django:
+
+    cd django-site
+    # mkvirtualenv rmi-ng
+    pip install -r requirements.txt
+    ./manage.py runserver
+    # open http://localhost:8000
