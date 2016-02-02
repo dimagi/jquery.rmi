@@ -44,11 +44,12 @@ function RMI(baseUrl, csrfToken, ajax) {
             config.method = data === undefined ? "GET" : "POST";
         }
         config.data = JSON.stringify(data);
-        config.url = join(baseUrl, func);
+        config.url = baseUrl;
         config.beforeSend = function (xhr) {
             if (csrfToken && !this.crossDomain) {
                 xhr.setRequestHeader("X-CSRFToken", csrfToken);
             }
+            xhr.setRequestHeader("DjNg-Remote-Method", func);
         };
         return ajax(config);
     }
