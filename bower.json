@@ -1,0 +1,25 @@
+{
+  "name": "jquery.rmi",
+  "main": "jquery.rmi.js",
+  "version": "0.1",
+  "homepage": "https://github.com/dimagi/jquery.rmi",
+  "authors": [
+    "Daniel Miller <dmiller@dimagi.com>"
+  ],
+  "description": "is a light-weight RPC library inspired by django-angular RMI.",
+  "moduleType": [],
+  "keywords": [
+    "rmi",
+    "remote",
+    "method",
+    "invocation"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
