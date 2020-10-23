@@ -1,6 +1,6 @@
 # jquery.rmi
 
-[![Build Status](https://travis-ci.org/dimagi/jquery.rmi.svg?branch=master)](https://travis-ci.org/dimagi/jquery.rmi)
+[![Build Status](https://travis-ci.com/dimagi/jquery.rmi.svg?branch=master)](https://travis-ci.com/dimagi/jquery.rmi)
 
 *jquery.rmi* is a light-weight RPC library inspired by
 [django-angular RMI](http://django-angular.readthedocs.org/en/latest/remote-method-invocation.html).
